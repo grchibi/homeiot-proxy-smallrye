@@ -16,8 +16,8 @@ $ mvn wrapper:wrapper
 To subscribe the MQTT broker(AWS IoT Core), need to identify the client.
 You have to copy the certificates to the resource directory.
 - AmazonRootCA1.pem: AWS CA Certificate
-- <ClientCert>.pem.crt: the client certificate
-- <ClientCert>.pem.key: the private key for the client certificate
+- [ClientCert].pem.crt: the client certificate
+- [ClientCert].pem.key: the private key for the client certificate
 
 ## Build
 
