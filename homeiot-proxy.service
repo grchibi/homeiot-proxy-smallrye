@@ -1,0 +1,12 @@
+[Unit]
+Description = Homeiot MQTT Proxy Service to call homeiot API to register the BME280 peripherals measurement data into database.
+
+[Service]
+Environment=JAR_FILE=/home/iot/userdata/homeiot-proxy-smallrye/target/quarkus-app/quarkus-run.jar
+ExecStart = /usr/bin/sudo -u iot /usr/bin/java -jar ${JAR_FILE}
+ExecStop = /bin/kill -SIGINT $MAINPID
+Restart=always
+Type = simple
+
+[Install]
+WantedBy = multi-user.target
