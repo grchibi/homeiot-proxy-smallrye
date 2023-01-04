@@ -1,0 +1,23 @@
+# PKCS12ファイル(秘密鍵＋証明書のセット)の生成
+openssl pkcs12 -export -inkey rbpi4-1-private.pem.key -in rbpi4-1-certificate.pem.crt -out rbpi4-1_cert.p12
+
+# JKS形式のトラストストアファイルを生成
+keytool -import -keystore ~/sec/trust_store.jks -file ~/sec/AmazonRootCA1.pem -alias "amazon root ca 1"
+keytool -import -v -trustcacerts -alias "amazon root ca 1" -file ~/sec/AmazonRootCA1.pem -keystore ~/sec/truststore.jks
+
+# 内容確認(パスワード入力を求められる)
+keytool -list -v -keystore src/main/resources/rbpi4-1_cert.p12 -storetype PKCS12
+
+# 接続確認
+openssl s_client -connect <AWS IoT, Settings, Device Data Endpoint's FQDN>:8883 -CAfile ~/sec/AmazonRootCA1.pem
+  or
+openssl s_client -connect <AWS IoT, Settings, Device Data Endpoint's FQDN>:8883 -CAfile <(keytool -list -rfc -keystore ~/sec/truststore.jks -storepass changeit)
+
+# テストデータ
+{
+ "dsrc": "rbpi0-4",
+ "dt": "202203182300",
+ "t": 16.62,
+ "p": 998.03,
+ "h": 57.81
+}
