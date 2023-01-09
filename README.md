@@ -48,6 +48,6 @@ $ systemctl start homeiot-proxy
 
 You can view the journal logs.
 ```
-$ journalctl -f -u homeiot-proxy.service
+$ journalctl --no-pager -u homeiot-proxy.service
 ```
 
