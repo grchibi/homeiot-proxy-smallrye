@@ -3,6 +3,7 @@ package org.zushisa9.tt.router;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 public class Tph {
     public String dsrc;
@@ -34,6 +35,20 @@ public class Tph {
         } catch (JsonProcessingException jpex) {
             jpex.printStackTrace();
         }
+    }
+
+    public String jsonToRegister() {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.enable(SerializationFeature.INDENT_OUTPUT);
+
+        String jsonStr;
+        try {
+            jsonStr = mapper.writeValueAsString(this);
+        } catch (JsonProcessingException ex) {
+            jsonStr = ex.getMessage();
+        }
+
+        return jsonStr;
     }
 
     public String toString() {
