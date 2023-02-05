@@ -57,6 +57,10 @@ $ systemctl start homeiot-proxy
 
 You can view the journal logs.
 ```
+<<<<<<< HEAD
 $ journalctl -u homeiot-proxy.service --no-pager --since="2023-01-27 18:00:00"
+=======
+$ journalctl --no-pager -u homeiot-proxy.service
+>>>>>>> refs/remotes/origin/main
 ```
 
