@@ -19,6 +19,15 @@ You have to copy the certificates to the resource directory.
 - [ClientCert].pem.crt: the client certificate
 - [ClientCert].pem.key: the private key for the client certificate
 
+## Modify the application's property file
+
+Modify the application.properties file.
+- mp.messaging.incoming.mqtt-broker.host
+- mp.messaging.incoming.mqtt-broker.client-id
+- mp.messaging.incoming.mqtt-broker.ssl.keystore.location
+- mp.messaging.incoming.mqtt-broker.ssl.keystore.password
+- quarkus.rest-client.homeiot-api.url
+
 ## Build
 
 ```
@@ -48,6 +57,6 @@ $ systemctl start homeiot-proxy
 
 You can view the journal logs.
 ```
-$ journalctl -f -u homeiot-proxy.service
+$ journalctl -u homeiot-proxy.service --no-pager --since="2023-01-27 18:00:00"
 ```
 
