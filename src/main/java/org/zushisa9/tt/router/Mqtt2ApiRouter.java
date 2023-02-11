@@ -1,20 +1,17 @@
 package org.zushisa9.tt.router;
 
-import java.util.concurrent.CompletionStage;
+import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.core.Response;
 
-import org.eclipse.microprofile.reactive.messaging.Channel;
-import org.eclipse.microprofile.reactive.messaging.Emitter;
+import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.reactive.messaging.Incoming;
+import org.eclipse.microprofile.rest.client.RestClientBuilder;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.quarkus.logging.Log;
 import io.smallrye.mutiny.Uni;
@@ -22,13 +19,33 @@ import io.smallrye.mutiny.Uni;
 @ApplicationScoped
 public class Mqtt2ApiRouter {
 
-    /*@Inject
-    @Channel("homeiot-api")
-    Emitter<String> emitterForJson;*/
     @Inject
     @RestClient
     HomeiotApiService apiService;
 
+    Map<String, HomeiotDynamicApiService> dynApiServices = new HashMap<>();
+
+    public Mqtt2ApiRouter() {
+        String dests = ConfigProvider.getConfig().getValue("tt.rest-client.keys", String.class);
+        String[] destsAry = dests.split(",");
+        for (String dest: destsAry) {
+            try {
+                String urlProperty = ConfigProvider.getConfig().getValue("tt.rest-client." + dest + ".url", String.class);
+                Log.debug("URI => " + urlProperty);
+
+                HomeiotDynamicApiService dynApiService = RestClientBuilder.newBuilder()
+                    .baseUri(URI.create(urlProperty))
+                    .build(HomeiotDynamicApiService.class);
+                
+                dynApiServices.put(urlProperty, dynApiService);
+                Log.info("API Servie created: " + urlProperty);
+
+            } catch (Exception ex) {
+                Log.warn("WARN in Mqtt2ApiRouter(): " + ex.getLocalizedMessage());
+            }
+        }
+    }
+    
     @Incoming("mqtt-broker")
     public void subscribeTphData(byte[] raw) {
         Log.info("subscribed: " + new String(raw));
@@ -36,17 +53,21 @@ public class Mqtt2ApiRouter {
         Tph tphData = new Tph(raw);
         Log.debug("created the Tph object => " + tphData.toString());
 
-        /*String strToSend = new TphRegister(tphData).jsonToRegister();
-        emitterForJson.send(strToSend);*/
+        for (Map.Entry<String, HomeiotDynamicApiService> dynApiServiceEntry: dynApiServices.entrySet()) {
+            try {
+                //Uni<Response> resp = dynApiServiceEntry.getValue().add(tphData);
+                Uni<Response> resp = dynApiServiceEntry.getValue().add(new TphRegister(tphData));
+                resp
+                .onFailure().invoke(fail -> Log.trace("onFailure(): " + dynApiServiceEntry.getKey() + " => " + fail) )
+                .subscribe().with(
+                    success -> Log.info("SUCESS: " + dynApiServiceEntry.getKey() + " => " + success.getStatus()),
+                    failure -> Log.error("FAILED: " + dynApiServiceEntry.getKey() + " => " + failure.getLocalizedMessage())
+                );
+                Log.debug("sent JSON data => " + dynApiServiceEntry.getKey() + " => " + tphData.jsonToRegister());
 
-        //CompletionStage<Response> respUni = apiService.add(tphData);
-        Uni<Response> resp = apiService.add(tphData);
-        resp
-        .onFailure().invoke(fail -> Log.trace("onFailure(): " + fail) )
-        .subscribe().with(
-            success -> Log.info("SUCESS: " + success.getStatus()),
-            failure -> Log.error("FAILED: " + failure.getLocalizedMessage())
-        );
-        Log.debug("sent JSON data => " + tphData.jsonToRegister());
+            } catch (Exception ex) {
+                Log.error("FAILED: " + dynApiServiceEntry.getKey() + " => " + ex.getLocalizedMessage());
+            }
+        }
     }
 }
