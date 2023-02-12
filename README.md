@@ -16,8 +16,8 @@ $ mvn wrapper:wrapper
 To subscribe the MQTT broker(AWS IoT Core), need to identify the client.
 You have to copy the certificates to the resource directory.
 - AmazonRootCA1.pem: AWS CA Certificate
-- [ClientCert].pem.crt: the client certificate
-- [ClientCert].pem.key: the private key for the client certificate
+- [ClientCert]-certificate.pem.crt: the client certificate
+- [ClientCert]-private.pem.key: the private key for the client certificate
 
 ## Modify the application's property file
 
@@ -26,7 +26,8 @@ Modify the application.properties file.
 - mp.messaging.incoming.mqtt-broker.client-id
 - mp.messaging.incoming.mqtt-broker.ssl.keystore.location
 - mp.messaging.incoming.mqtt-broker.ssl.keystore.password
-- quarkus.rest-client.homeiot-api.url
+- tt.rest-client.keys=<KEY1>,<KEY2>,...,<KEYn>
+- tt.rest-client.<KEYn>.url
 
 ## Build
 
