@@ -26,8 +26,8 @@ Modify the application.properties file.
 - mp.messaging.incoming.mqtt-broker.client-id
 - mp.messaging.incoming.mqtt-broker.ssl.keystore.location
 - mp.messaging.incoming.mqtt-broker.ssl.keystore.password
-- tt.rest-client.keys=<KEY1>,<KEY2>,...,<KEYn>
-- tt.rest-client.<KEYn>.url
+- tt.rest-client.keys=[KEY1],[KEY2],...,[KEYn]
+- tt.rest-client.[KEYn].url
 
 ## Build
 
